@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import placeholderImage from '../img/metronome.png';
 
 
 function Metronome() {
@@ -9,6 +10,12 @@ function Metronome() {
         volume: 1,
         bpm: 100
     })
+
+    var lastTapSeconds = metronome.bpm;
+    var bpm = metronome.bpm;
+    var beats = [];
+    var average = 0;
+    var count = 0;
     
 
     useEffect(() => {
@@ -56,12 +63,37 @@ function Metronome() {
         })
     }
 
-    //function handleTapTempo(e) {}
+    function handleTapTempo(e) {
+        let tapSeconds = new Date().getTime();
+
+        bpm = ((1/ ((tapSeconds - lastTapSeconds) / 1000)) * 60 ); 
+        lastTapSeconds = tapSeconds;
+
+        if (Math.floor(bpm) === 0) {
+            beats.push(Math.floor(bpm));    
+            average *= count;
+            average += Math.floor(bpm);
+            count++
+            average /= count;
+        }
+
+        if(beats.length >= 10) {
+            console.log("Average: " + average)
+        }
+    }
     
     return (
         <div>
-            <div>
+            <div className='metronome-graphic'>
+                <img src={placeholderImage} alt="Placeholder for the Metronome"/>
+            </div>
+
+            <div className='flex'>
                 <button id='playing' onClick={handleMetronomeChange}>{metronome.playing ? "Pause" : "Play"}</button>
+            </div>
+
+            <div className='flex'>
+                <button onClick={handleTapTempo}>BPM</button>
             </div>
 
             <div className='flex'>
@@ -71,7 +103,7 @@ function Metronome() {
 
             <div className='flex'>
                 <p>BPM</p>   
-                <input id='bpm' type="range" min="60" max="240" value={metronome.bpm} onChange={handleMetronomeChange} />
+                <input id='bpm' type="range" min="30" max="240" value={metronome.bpm} onChange={handleMetronomeChange} />
             </div>
 
         </div>
