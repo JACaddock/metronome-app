@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/metronome-app/static/css/main.ebe196d4.css",
+    "main.js": "/metronome-app/static/js/main.1e6a60f8.js",
+    "static/js/787.18dc570a.chunk.js": "/metronome-app/static/js/787.18dc570a.chunk.js",
+    "index.html": "/metronome-app/index.html",
+    "main.ebe196d4.css.map": "/metronome-app/static/css/main.ebe196d4.css.map",
+    "main.1e6a60f8.js.map": "/metronome-app/static/js/main.1e6a60f8.js.map",
+    "787.18dc570a.chunk.js.map": "/metronome-app/static/js/787.18dc570a.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.ebe196d4.css",
+    "static/js/main.1e6a60f8.js"
+  ]
+}
