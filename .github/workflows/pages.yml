@@ -15,11 +15,11 @@ jobs:
       - name: Install and Build 🔧
         run: |
           npm install
-          npm run-script build
+          npm run build
 
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@releases/v3
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: build
-          FOLDER: project/build
+          FOLDER: build
