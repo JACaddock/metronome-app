@@ -4,5 +4,5 @@
 
 ## Live Demo
 
-Here is a link to the live demo: ([Live Demo](https://jacaddock.github.io/metronome-app/))
+Here is a link to the live demo: ([Live Demo](https://jacaddock.github.io/metronome-app.github.io/))
 
