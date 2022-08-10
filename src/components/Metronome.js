@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 import placeholderImage from '../img/metronome.png';
+import metSound from "../static/metronome1.wav"
 
 
 function Metronome() {
     const metronomeRef = useRef();
     const [metronome, setMetronome] = useState({
-        audio: new Audio("./static/metronome1.wav"),
+        audio: new Audio(metSound),
         playing: false,
         volume: 1,
         bpm: 100
