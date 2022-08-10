@@ -5,18 +5,16 @@ import placeholderImage from '../img/metronome.png';
 function Metronome() {
     const metronomeRef = useRef();
     const [metronome, setMetronome] = useState({
-        audio: new Audio("./static/samp9Metronom1.WAV"),
+        audio: new Audio("./static/metronome1.wav"),
         playing: false,
         volume: 1,
         bpm: 100
     })
 
-    var lastTapSeconds = metronome.bpm;
-    var bpm = metronome.bpm;
-    var beats = [];
-    var average = 0;
-    var count = 0;
     
+    const [lastTapSeconds, setLastTapSeconds] = useState(0);
+    const [beats, setBeats] = useState([]);
+    const [average, setAverage] = useState(0);
 
     useEffect(() => {
         if (metronome.playing) {
@@ -63,48 +61,84 @@ function Metronome() {
         })
     }
 
+    function handleKeyDown(e) {
+        if (e.key === "t") {
+            handleTapTempo(e);
+        }
+    }
+
     function handleTapTempo(e) {
+                
         let tapSeconds = new Date().getTime();
+        
+        let bpm = ((1/ ((tapSeconds - lastTapSeconds) / 1000)) * 60 ); 
+        setLastTapSeconds(tapSeconds);
 
-        bpm = ((1/ ((tapSeconds - lastTapSeconds) / 1000)) * 60 ); 
-        lastTapSeconds = tapSeconds;
 
-        if (Math.floor(bpm) === 0) {
-            beats.push(Math.floor(bpm));    
-            average *= count;
-            average += Math.floor(bpm);
-            count++
-            average /= count;
+        if (Math.floor(bpm) !== 0) {
+            let avg = average * beats.length;
+            avg += Math.floor(bpm);
+            avg /= (beats.length + 1);
+
+            setBeats([...beats, Math.floor(bpm)]); 
+
+            setAverage(Math.floor(avg));
+
+            handleMetronomeChange({
+                target: {
+                    id: "bpm",
+                    value: Math.floor(bpm)
+                }
+            })
+
+            console.log(beats, average)
         }
 
         if(beats.length >= 10) {
-            console.log("Average: " + average)
+            handleMetronomeChange({
+                target: {
+                    id: "bpm",
+                    value: average
+                }
+            })
+
+            setAverage(0);
+            setLastTapSeconds(0);
+            setBeats([]);
         }
+
+        
+
     }
     
     return (
-        <div>
+        <div onKeyDown={handleKeyDown} className='metronome'>
             <div className='metronome-graphic'>
                 <img src={placeholderImage} alt="Placeholder for the Metronome"/>
             </div>
 
             <div className='flex'>
-                <button id='playing' onClick={handleMetronomeChange}>{metronome.playing ? "Pause" : "Play"}</button>
+                <button className='metronome-btn' id='playing' onClick={handleMetronomeChange}>{metronome.playing ? "Pause" : "Play"}</button>
             </div>
 
-            <div className='flex'>
-                <button onClick={handleTapTempo}>BPM</button>
+            <div className='flex column'>
+                <h2>{ metronome.bpm }</h2>
+                <button className='metronome-btn' onClick={handleTapTempo}>BPM</button>
             </div>
 
-            <div className='flex'>
-                <p>Volume</p>   
-                <input id='volume' type="range" min="0" max="1" step="0.01" value={metronome.volume} onChange={handleMetronomeChange} />
+            <div className='flex column'>
+                <div className='row'> 
+                    <p>Volume</p>   
+                    <input id='volume' type="range" min="0" max="1" step="0.01" value={metronome.volume} onChange={handleMetronomeChange} />
+                </div>
+                
+                <div className='row'>
+                    <p>BPM</p>   
+                    <input id='bpm' type="range" min="30" max="240" value={metronome.bpm} onChange={handleMetronomeChange} />
+                </div>
             </div>
 
-            <div className='flex'>
-                <p>BPM</p>   
-                <input id='bpm' type="range" min="30" max="240" value={metronome.bpm} onChange={handleMetronomeChange} />
-            </div>
+            
 
         </div>
     )
