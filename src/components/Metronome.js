@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import useSound from 'use-sound';
 import placeholderImage from '../img/metronome.png';
 import metSoundHi from "../static/ping-hi.mp3";
 import metSoundLow from "../static/ping-low.mp3";
@@ -7,38 +8,38 @@ import metSoundLow from "../static/ping-low.mp3";
 
 function Metronome() {
     const metronomeRef = useRef();
+
+    const [sound, index, changeChosenSound] = useSoundMachine();
+
+    const [high] = useSound(sound[index].high);
+    const [low] = useSound(sound[index].low);
     
-    const [sound, getChosenSound, changeChosenSound] = useSound();
 
 
-    function useSound() {
-        const sound = useState({high: metSoundHi, low: metSoundLow});
+    function useSoundMachine() {
+        const sound = useState([{high: metSoundHi, low: metSoundLow}]);
         const [index, setIndex] = useState(0);
+        
 
-
-        function getChosenSound() {
-            return sound[index];
-        }
 
         function changeChosenSound(i) {
-            setIndex(i);
+            if (i >= 0 && i < sound.length) {
+                setIndex(i);
+            }
         }
 
-
-        return [sound, getChosenSound, changeChosenSound];
+        return [sound, index, changeChosenSound];
     }
     
     const [clicks, addClick, removeLastClick, getLastPlayed, playNextClick, restartClicks] = useClickSound();
 
 
     function useClickSound() {
-        var chosenSound = getChosenSound();
-
-        const [clicks, setClicks] = useState([new Audio(chosenSound.high), new Audio(chosenSound.low)]);
+        const [clicks, setClicks] = useState([0, 1]);
         const [count, setCount] = useState(-1);
 
         function addClick() {
-            setClicks([...clicks, new Audio(sound[0].low)]);
+            setClicks([...clicks, clicks.length]);
             restartClicks();
         }
 
@@ -54,24 +55,12 @@ function Metronome() {
         function playNextClick() {
             if (count >= clicks.length - 1) {
                 setCount(0);
-                loadNextClick(1);
                 return 0;
             } else { 
                 setCount(count + 1);
 
-                if (count + 1 >= clicks.length - 1) {
-                    loadNextClick(0);
-                } else {
-                    loadNextClick(count + 2);
-                }
-
                 return count + 1;
             }
-        }
-
-
-        function loadNextClick(i) {
-            clicks[i].load();
         }
 
         function restartClicks() {
@@ -124,10 +113,14 @@ function Metronome() {
             
 
             metronomeRef.current = setInterval(() => {
-                let click = playNextClick();
-                clicks[click].load();
-                clicks[click].play();
-                clicks[click].volume = metronome.volume;
+                let count = playNextClick();
+
+                if (count === 0) {
+                    high();
+                } else {
+                    low();
+                }
+                
                 
             }, (60 * 1000 / metronome.bpm));
             
@@ -220,10 +213,10 @@ function Metronome() {
             </div>
             
             <div className='flex column'>
-                <div className='flex'>{clicks.map((click, index) => 
-                    <div key={click + index}>
+                <div className='flex'>{clicks.map((click) => 
+                    <div key={click}>
                         {
-                            getLastPlayed()===index ? 
+                            getLastPlayed()===click ? 
                             <input type="radio" disabled className='metronome-radio metronome-radio-active' /> 
                             : 
                             <input type="radio" disabled className='metronome-radio' /> 
