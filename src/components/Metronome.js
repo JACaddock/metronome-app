@@ -244,7 +244,7 @@ function Metronome() {
                 </div>
 
                 <div className='row'>
-                    {sounds.map((sound,index) => <button key={index} onClick={() => changeChosenSound(index)}>{ index }</button>)}
+                    {sounds.map((sound,index) => <button className='metronome-btn' key={index} onClick={() => changeChosenSound(index)}>{ index }</button>)}
                 </div>
             </div>
 
