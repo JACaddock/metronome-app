@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import placeholderImage from '../img/metronome.png';
-import metSound from "../static/metronome1.mp3";
+import metSoundHi from "../static/ping-hi.mp3";
+import metSoundLow from "../static/ping-low.mp3";
 
 
 
@@ -19,7 +20,22 @@ function Metronome() {
 
     function useMetronome() {
         const metronomeRef = useRef();
-        const [sound, setSound] = useState(metSound);
+
+        const [sound, setSound] = useState(metSoundHi);
+        
+        const [clicks, addClick] = useClickSound();
+
+
+        function useClickSound() {
+            const [clicks, setClicks] = useState([new Audio(metSoundLow), new Audio(metSoundLow)]);
+
+            function addClick(s) {
+                setClicks([...clicks, s]);
+            }
+
+            return [clicks, addClick]
+        }
+
         const [metronome, setMetronome] = useState({
             playing: false,
             volume: 1,
@@ -62,14 +78,22 @@ function Metronome() {
 
 
         useEffect(() => {
+
             if (metronome.playing) {
                 clearInterval(metronomeRef.current);
+                var count = 0;
     
                 metronomeRef.current = setInterval(() => {
-                    let audio = new Audio(sound);
-                    audio.play();
-                    audio.volume = metronome.volume;
-                },(60 / metronome.bpm) * 1000);
+                    if (count <= clicks.length - 1) {
+                        clicks[count].play();
+                        clicks[count].volume = metronome.volume;
+                        count++;
+                    } else {
+                        count = 1;
+                        clicks[0].play();
+                        clicks[0].volume = metronome.volume;
+                    }
+                }, (60 * 1000 / metronome.bpm));
                 
                 
             } else {
