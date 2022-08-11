@@ -23,6 +23,21 @@
   padding: 32px 124px;
 }
 
+.metronome-radio {
+  appearance: none;
+  font: inherit;
+  color: white;
+  width: 1em;
+  height: 1em;
+  padding: 8px;
+  border: 0.15em solid black;
+  border-radius: 50%;
+}
+
+.metronome-radio-active {
+  background-color: black;
+}
+
 .flex {
   display: flex;
   place-self: center;
@@ -45,6 +60,7 @@
 .metronome-graphic {
   display: inline-flex;
   place-content: center;
+  margin-top: 20px;
 }
 
 .metronome-btn {
@@ -56,6 +72,7 @@
   min-width: 40px;
   text-align: center;
   cursor: pointer;
+  color: black;
 }
 
 .metronome-btn:hover {

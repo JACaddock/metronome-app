@@ -15,96 +15,112 @@ function Metronome() {
         bpm: 100
     }) */
 
-    const [metronome, handleMetronomeChange] = useMetronome();
 
 
-    function useMetronome() {
-        const metronomeRef = useRef();
+    const metronomeRef = useRef();
+    
 
-        const [sound, setSound] = useState(metSoundHi);
-        
-        const [clicks, addClick] = useClickSound();
+    const [sound, setSound] = useState(metSoundLow);
+    
+    const [clicks, addClick, removeLastClick, getLastPlayed, playNextClick, restartClicks] = useClickSound();
 
 
-        function useClickSound() {
-            const [clicks, setClicks] = useState([new Audio(metSoundLow), new Audio(metSoundLow)]);
+    function useClickSound() {
+        const [clicks, setClicks] = useState([new Audio(metSoundHi), new Audio(sound)]);
+        const [count, setCount] = useState(-1);
 
-            function addClick(s) {
-                setClicks([...clicks, s]);
-            }
-
-            return [clicks, addClick]
+        function addClick() {
+            setClicks([...clicks, new Audio(sound)]);
+            setCount(0);
         }
 
-        const [metronome, setMetronome] = useState({
-            playing: false,
-            volume: 1,
-            bpm: 100
-        })
-
-
-        function handleMetronomeChange(e) {
-            let playing = metronome.playing;
-            let volume = metronome.volume;
-            let bpm = metronome.bpm;
-    
-            switch (e.target.id) {
-                case "sound":
-                    setSound(e.target.value);
-                    break;
-
-                case "playing":
-                    playing = !playing;
-                    break;
-    
-                case "volume":
-                    volume = e.target.value;
-                    break;
-    
-                case "bpm":
-                    bpm = e.target.value;
-                    break;
-            
-                default:
-                    break;
-            }
-    
-            setMetronome({
-                playing: playing,
-                volume: volume,
-                bpm: bpm
-            })
+        function removeLastClick() {
+            setClicks(clicks.splice(0,clicks.length-1));
+            setCount(0);
         }
 
+        function getLastPlayed() {
+            return count;
+        }
 
-        useEffect(() => {
-
-            if (metronome.playing) {
-                clearInterval(metronomeRef.current);
-                var count = 0;
-    
-                metronomeRef.current = setInterval(() => {
-                    if (count <= clicks.length - 1) {
-                        clicks[count].play();
-                        clicks[count].volume = metronome.volume;
-                        count++;
-                    } else {
-                        count = 1;
-                        clicks[0].play();
-                        clicks[0].volume = metronome.volume;
-                    }
-                }, (60 * 1000 / metronome.bpm));
-                
-                
-            } else {
-                clearInterval(metronomeRef.current);
+        function playNextClick() {
+            if (count >= clicks.length - 1) {
+                setCount(0);
+                return 0;
+            } else { 
+                setCount(count + 1);
+                return count + 1;
             }
+        }
 
-            
-        })
+        function restartClicks() {
+            setCount(-1);
+        }
 
-        return [metronome, handleMetronomeChange];
+        return [clicks, addClick, removeLastClick, getLastPlayed, playNextClick, restartClicks]
     }
+
+    const [metronome, setMetronome] = useState({
+        playing: false,
+        volume: 1,
+        bpm: 100
+    })
+
+
+    function handleMetronomeChange(e) {
+        let playing = metronome.playing;
+        let volume = metronome.volume;
+        let bpm = metronome.bpm;
+
+        switch (e.target.id) {
+            case "sound":
+                setSound(e.target.value);
+                break;
+
+            case "playing":
+                playing = !playing;
+                break;
+
+            case "volume":
+                volume = e.target.value;
+                break;
+
+            case "bpm":
+                bpm = e.target.value;
+                break;
+        
+            default:
+                break;
+        }
+
+        setMetronome({
+            playing: playing,
+            volume: volume,
+            bpm: bpm
+        })
+    }
+
+    useEffect(() => {
+
+        if (metronome.playing) {
+            clearInterval(metronomeRef.current);
+            
+
+            metronomeRef.current = setInterval(() => {
+                let click = playNextClick();
+                clicks[click].play();
+                clicks[click].volume = metronome.volume;
+                
+            }, (60 * 1000 / metronome.bpm));
+            
+            
+        } else {
+            clearInterval(metronomeRef.current);
+            restartClicks();
+        }
+
+        
+    })
 
     
     const [lastTapSeconds, setLastTapSeconds] = useState(0);
@@ -183,6 +199,23 @@ function Metronome() {
                 {message !== "" ? <h3>{ message }</h3> : <h3>{ metronome.bpm }</h3>}
                 
                 <button className='metronome-btn' onClick={handleTapTempo}>BPM</button>
+            </div>
+            
+            <div className='flex column'>
+                <div className='flex'>{clicks.map((click, index) => 
+                    <div key={click + index}>
+                        {
+                            getLastPlayed()===index ? 
+                            <input type="radio" disabled className='metronome-radio metronome-radio-active' /> 
+                            : 
+                            <input type="radio" disabled className='metronome-radio' /> 
+                        }
+                    </div> )}
+                </div>
+                <div className='flex row'>
+                    <button className='metronome-btn' onClick={addClick}>Add Click</button>
+                    <button className='metronome-btn' onClick={removeLastClick}>Remove Click</button>
+                </div>
             </div>
 
             <div className='flex column'>
