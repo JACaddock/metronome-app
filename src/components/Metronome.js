@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Children } from 'react';
 import placeholderImage from '../img/metronome.png';
 import metSoundHi from "../static/ping-hi.mp3";
 import metSoundLow from "../static/ping-low.mp3";
@@ -6,37 +6,45 @@ import metSoundLow from "../static/ping-low.mp3";
 
 
 function Metronome() {
-    //const metronomeRef = useRef();
-    
-    /*const [metronome, setMetronome] = useState({
-        audio: new Audio(metSound),
-        playing: false,
-        volume: 1,
-        bpm: 100
-    }) */
-
-
-
     const metronomeRef = useRef();
     
+    const [sound, getChosenSound, changeChosenSound] = useSound();
 
-    const [sound, setSound] = useState(metSoundLow);
+
+    function useSound() {
+        const sound = useState({high: metSoundHi, low: metSoundLow});
+        const [index, setIndex] = useState(0);
+
+
+        function getChosenSound() {
+            return sound[index];
+        }
+
+        function changeChosenSound(i) {
+            setIndex(i);
+        }
+
+
+        return [sound, getChosenSound, changeChosenSound];
+    }
     
     const [clicks, addClick, removeLastClick, getLastPlayed, playNextClick, restartClicks] = useClickSound();
 
 
     function useClickSound() {
-        const [clicks, setClicks] = useState([new Audio(metSoundHi), new Audio(sound)]);
+        var chosenSound = getChosenSound();
+
+        const [clicks, setClicks] = useState([new Audio(chosenSound.high), new Audio(chosenSound.low)]);
         const [count, setCount] = useState(-1);
 
         function addClick() {
-            setClicks([...clicks, new Audio(sound)]);
-            setCount(0);
+            setClicks([...clicks, new Audio(sound[0].low)]);
+            restartClicks();
         }
 
         function removeLastClick() {
             setClicks(clicks.splice(0,clicks.length-1));
-            setCount(0);
+            restartClicks();
         }
 
         function getLastPlayed() {
@@ -73,10 +81,6 @@ function Metronome() {
         let bpm = metronome.bpm;
 
         switch (e.target.id) {
-            case "sound":
-                setSound(e.target.value);
-                break;
-
             case "playing":
                 playing = !playing;
                 break;
