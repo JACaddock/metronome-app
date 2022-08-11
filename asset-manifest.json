@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/metronome-app/static/css/main.c3b1993c.css",
-    "main.js": "/metronome-app/static/js/main.36539cb7.js",
+    "main.css": "/metronome-app/static/css/main.0e1d6e38.css",
+    "main.js": "/metronome-app/static/js/main.a480930f.js",
     "static/js/787.18dc570a.chunk.js": "/metronome-app/static/js/787.18dc570a.chunk.js",
-    "static/media/metronome1.wav": "/metronome-app/static/media/metronome1.9a4a0f9f14b8fbd4cbc1.wav",
+    "static/media/metronome1.mp3": "/metronome-app/static/media/metronome1.8be044856dc90090d0bf.mp3",
     "index.html": "/metronome-app/index.html",
-    "main.c3b1993c.css.map": "/metronome-app/static/css/main.c3b1993c.css.map",
-    "main.36539cb7.js.map": "/metronome-app/static/js/main.36539cb7.js.map",
+    "main.0e1d6e38.css.map": "/metronome-app/static/css/main.0e1d6e38.css.map",
+    "main.a480930f.js.map": "/metronome-app/static/js/main.a480930f.js.map",
     "787.18dc570a.chunk.js.map": "/metronome-app/static/js/787.18dc570a.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.c3b1993c.css",
-    "static/js/main.36539cb7.js"
+    "static/css/main.0e1d6e38.css",
+    "static/js/main.a480930f.js"
   ]
 }
