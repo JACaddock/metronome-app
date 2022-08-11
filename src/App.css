@@ -1,3 +1,7 @@
+*{
+  overflow: hidden;
+}
+
 .App {
   text-align: center;
   background-color: #282c34;
@@ -43,7 +47,7 @@
   place-self: center;
   place-items: center;
   place-content: center;
-  margin-top: 2rem;
+  margin-top: 1rem;
   
 }
 

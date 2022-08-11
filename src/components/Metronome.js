@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, Children } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import placeholderImage from '../img/metronome.png';
 import metSoundHi from "../static/ping-hi.mp3";
 import metSoundLow from "../static/ping-low.mp3";
@@ -54,11 +54,24 @@ function Metronome() {
         function playNextClick() {
             if (count >= clicks.length - 1) {
                 setCount(0);
+                loadNextClick(1);
                 return 0;
             } else { 
                 setCount(count + 1);
+
+                if (count + 1 >= clicks.length - 1) {
+                    loadNextClick(0);
+                } else {
+                    loadNextClick(count + 2);
+                }
+
                 return count + 1;
             }
+        }
+
+
+        function loadNextClick(i) {
+            clicks[i].load();
         }
 
         function restartClicks() {
@@ -112,6 +125,7 @@ function Metronome() {
 
             metronomeRef.current = setInterval(() => {
                 let click = playNextClick();
+                clicks[click].load();
                 clicks[click].play();
                 clicks[click].volume = metronome.volume;
                 
