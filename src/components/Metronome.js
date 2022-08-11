@@ -1,34 +1,36 @@
 import { useState, useEffect, useRef } from 'react';
 import useSound from 'use-sound';
 import placeholderImage from '../img/metronome.png';
-import metSoundHi from "../static/ping-hi.mp3";
-import metSoundLow from "../static/ping-low.mp3";
+import metSoundHi from "../static/metronome2.mp3";
+import pingSoundHi from "../static/ping-hi.mp3";
+import metSoundLow from "../static/metronome1.mp3";
+import pingSoundLow from "../static/ping-low.mp3";
 
 
 
 function Metronome() {
     const metronomeRef = useRef();
 
-    const [sound, index, changeChosenSound] = useSoundMachine();
+    const [sounds, index, changeChosenSound] = useSoundMachine();
 
-    const [high] = useSound(sound[index].high);
-    const [low] = useSound(sound[index].low);
+
+    const [high] = useSound(sounds[index].high);
+    const [low] = useSound(sounds[index].low);
     
 
 
     function useSoundMachine() {
-        const sound = useState([{high: metSoundHi, low: metSoundLow}]);
-        const [index, setIndex] = useState(0);
+        const [sounds] = useState([{high: metSoundHi, low: metSoundLow}, {high: pingSoundHi, low: pingSoundLow}]);
+        const [index, setIndex] = useState(1);
         
 
-
         function changeChosenSound(i) {
-            if (i >= 0 && i < sound.length) {
+            if (i >= 0 && i < sounds.length) {
                 setIndex(i);
             }
         }
 
-        return [sound, index, changeChosenSound];
+        return [sounds, index, changeChosenSound];
     }
     
     const [clicks, addClick, removeLastClick, getLastPlayed, playNextClick, restartClicks] = useClickSound();
@@ -85,6 +87,7 @@ function Metronome() {
         switch (e.target.id) {
             case "playing":
                 playing = !playing;
+                
                 break;
 
             case "volume":
@@ -107,16 +110,16 @@ function Metronome() {
     }
 
     useEffect(() => {
-
         if (metronome.playing) {
             clearInterval(metronomeRef.current);
             
-
+    
             metronomeRef.current = setInterval(() => {
                 let count = playNextClick();
-
+    
                 if (count === 0) {
                     high();
+                    
                 } else {
                     low();
                 }
@@ -129,9 +132,9 @@ function Metronome() {
             clearInterval(metronomeRef.current);
             restartClicks();
         }
-
-        
     })
+       
+    
 
     
     const [lastTapSeconds, setLastTapSeconds] = useState(0);
@@ -238,6 +241,10 @@ function Metronome() {
                 <div className='row'>
                     <p>BPM</p>   
                     <input id='bpm' type="range" min="30" max="260" value={metronome.bpm} onChange={handleMetronomeChange} />
+                </div>
+
+                <div className='row'>
+                    {sounds.map((sound,index) => <button key={index} onClick={() => changeChosenSound(index)}>{ index }</button>)}
                 </div>
             </div>
 
