@@ -1,66 +1,98 @@
 import { useState, useEffect, useRef } from 'react';
 import placeholderImage from '../img/metronome.png';
-import metSound from "../static/metronome1.wav"
+import metSound from "../static/metronome1.mp3";
+
 
 
 function Metronome() {
-    const metronomeRef = useRef();
-    const [metronome, setMetronome] = useState({
+    //const metronomeRef = useRef();
+    
+    /*const [metronome, setMetronome] = useState({
         audio: new Audio(metSound),
         playing: false,
         volume: 1,
         bpm: 100
-    })
+    }) */
+
+    const [metronome, handleMetronomeChange] = useMetronome();
+
+
+    function useMetronome() {
+        const metronomeRef = useRef();
+        const [sound, setSound] = useState(metSound);
+        const [metronome, setMetronome] = useState({
+            playing: false,
+            volume: 1,
+            bpm: 100
+        })
+
+
+        function handleMetronomeChange(e) {
+            let playing = metronome.playing;
+            let volume = metronome.volume;
+            let bpm = metronome.bpm;
+    
+            switch (e.target.id) {
+                case "sound":
+                    setSound(e.target.value);
+                    break;
+
+                case "playing":
+                    playing = !playing;
+                    break;
+    
+                case "volume":
+                    volume = e.target.value;
+                    break;
+    
+                case "bpm":
+                    bpm = e.target.value;
+                    break;
+            
+                default:
+                    break;
+            }
+    
+            setMetronome({
+                playing: playing,
+                volume: volume,
+                bpm: bpm
+            })
+        }
+
+
+        useEffect(() => {
+            if (metronome.playing) {
+                clearInterval(metronomeRef.current);
+    
+                metronomeRef.current = setInterval(() => {
+                    let audio = new Audio(sound);
+                    audio.play();
+                    audio.volume = metronome.volume;
+                },(60 / metronome.bpm) * 1000);
+                
+                
+            } else {
+                clearInterval(metronomeRef.current);
+            }
+
+            
+        })
+
+        return [metronome, handleMetronomeChange];
+    }
 
     
     const [lastTapSeconds, setLastTapSeconds] = useState(0);
     const [beats, setBeats] = useState([]);
     const [average, setAverage] = useState(0);
 
-    useEffect(() => {
-        if (metronome.playing) {
-            clearInterval(metronomeRef.current);
+    const [message, setMessage] = useState("");
 
-            metronomeRef.current = setInterval(() => {
-                metronome.audio.play();
-                metronome.audio.volume = metronome.volume;
-            },(60 / metronome.bpm) * 1000);
-            
-            
-        } else {
-            clearInterval(metronomeRef.current);
-        }
-    })
+    
 
 
-    function handleMetronomeChange(e) {
-        let playing = metronome.playing;
-        let volume = metronome.volume;
-        let bpm = metronome.bpm;
-
-        switch (e.target.id) {
-            case "playing":
-                playing = !playing;
-                break;
-            case "volume":
-                volume = e.target.value;
-                break;
-
-            case "bpm":
-                bpm = e.target.value;
-                break;
-        
-            default:
-                break;
-        }
-
-        setMetronome({
-            audio: metronome.audio,
-            playing: playing,
-            volume: volume,
-            bpm: bpm
-        })
-    }
+    
 
     function handleKeyDown(e) {
         if (e.key === "t") {
@@ -103,6 +135,7 @@ function Metronome() {
                 }
             })
 
+            setMessage("Average: " + average);
             setAverage(0);
             setLastTapSeconds(0);
             setBeats([]);
@@ -123,7 +156,8 @@ function Metronome() {
             </div>
 
             <div className='flex column'>
-                <h2>{ metronome.bpm }</h2>
+                {message !== "" ? <h3>{ message }</h3> : <h3>{ metronome.bpm }</h3>}
+                
                 <button className='metronome-btn' onClick={handleTapTempo}>BPM</button>
             </div>
 
@@ -135,7 +169,7 @@ function Metronome() {
                 
                 <div className='row'>
                     <p>BPM</p>   
-                    <input id='bpm' type="range" min="30" max="240" value={metronome.bpm} onChange={handleMetronomeChange} />
+                    <input id='bpm' type="range" min="30" max="260" value={metronome.bpm} onChange={handleMetronomeChange} />
                 </div>
             </div>
 

@@ -66,3 +66,27 @@
   opacity: 60%;
   background-color: rgb(171, 200, 201);
 }
+
+@media screen and (max-width: 800px) {
+  .metronome {
+    padding: 16px 64px;
+  }
+}
+
+
+@media screen and (max-width: 540px) {
+  .metronome {
+    padding: 8px 32px;
+  }
+}
+
+
+@media screen and (max-width: 380px) {
+  .metronome {
+    padding: 4px 16px;
+  }
+
+  h1 {
+    font-size: 24px;
+  }
+}
