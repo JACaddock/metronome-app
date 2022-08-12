@@ -1,37 +1,31 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import useSound from 'use-sound';
 import placeholderImage from '../img/metronome.png';
-import metSoundHi from "../static/metronome2.mp3";
 import pingSoundHi from "../static/ping-hi.mp3";
-import metSoundLow from "../static/metronome1.mp3";
 import pingSoundLow from "../static/ping-low.mp3";
 
 
 
-function Metronome() {
-    const metronomeRef = useRef();
+function Metronome() {   
 
-    const [sounds, index, changeChosenSound] = useSoundMachine();
+    const [playing, setPlaying] = useState(false);
+    const [volume, setVolume] = useState(0.5);
+    const [bpm, setBpm] = useState(100);
 
 
-    const [high] = useSound(sounds[index].high);
-    const [low] = useSound(sounds[index].low);
+    const [high] = useSound(pingSoundHi, {
+        id: "high",
+        volume: volume
+    }) ;
+    const [low] = useSound(pingSoundLow, {
+        id: "low",
+        volume: volume
+    });
     
+    const [lastTapSeconds, setLastTapSeconds] = useState(0);
+    const [beats, setBeats] = useState([]);  
 
 
-    function useSoundMachine() {
-        const [sounds] = useState([{high: metSoundHi, low: metSoundLow}, {high: pingSoundHi, low: pingSoundLow}]);
-        const [index, setIndex] = useState(1);
-        
-
-        function changeChosenSound(i) {
-            if (i >= 0 && i < sounds.length) {
-                setIndex(i);
-            }
-        }
-
-        return [sounds, index, changeChosenSound];
-    }
     
     const [clicks, addClick, removeLastClick, getLastPlayed, playNextClick, restartClicks] = useClickSound();
 
@@ -41,13 +35,17 @@ function Metronome() {
         const [count, setCount] = useState(-1);
 
         function addClick() {
-            setClicks([...clicks, clicks.length]);
-            restartClicks();
+            if (clicks.length < 12) {
+                setClicks([...clicks, clicks.length]);
+                restartClicks();
+            }
         }
 
         function removeLastClick() {
-            setClicks(clicks.splice(0,clicks.length-1));
-            restartClicks();
+            if (clicks.length > 1) {
+                setClicks(clicks.splice(0,clicks.length-1));
+                restartClicks();
+            }
         }
 
         function getLastPlayed() {
@@ -72,49 +70,13 @@ function Metronome() {
         return [clicks, addClick, removeLastClick, getLastPlayed, playNextClick, restartClicks]
     }
 
-    const [metronome, setMetronome] = useState({
-        playing: false,
-        volume: 1,
-        bpm: 100
-    })
-
-
-    function handleMetronomeChange(e) {
-        let playing = metronome.playing;
-        let volume = metronome.volume;
-        let bpm = metronome.bpm;
-
-        switch (e.target.id) {
-            case "playing":
-                playing = !playing;
-                
-                break;
-
-            case "volume":
-                volume = e.target.value;
-                break;
-
-            case "bpm":
-                bpm = e.target.value;
-                break;
-        
-            default:
-                break;
-        }
-
-        setMetronome({
-            playing: playing,
-            volume: volume,
-            bpm: bpm
-        })
-    }
 
     useEffect(() => {
-        if (metronome.playing) {
-            clearInterval(metronomeRef.current);
-            
+        var metronomeInterval = null;
+
+        if (playing) {           
     
-            metronomeRef.current = setInterval(() => {
+            metronomeInterval = setInterval(() => {
                 let count = playNextClick();
     
                 if (count === 0) {
@@ -125,27 +87,18 @@ function Metronome() {
                 }
                 
                 
-            }, (60 * 1000 / metronome.bpm));
+            }, (60 * 1000 / bpm));
             
             
         } else {
-            clearInterval(metronomeRef.current);
             restartClicks();
         }
-    })
+
+        return () => {
+            clearInterval(metronomeInterval);
+        }
+    }, [playing, bpm, high, low, playNextClick, restartClicks])
        
-    
-
-    
-    const [lastTapSeconds, setLastTapSeconds] = useState(0);
-    const [beats, setBeats] = useState([]);
-    const [average, setAverage] = useState(0);
-
-    const [message, setMessage] = useState("");
-
-    
-
-
     
 
     function handleKeyDown(e) {
@@ -154,49 +107,44 @@ function Metronome() {
         }
     }
 
-    function handleTapTempo(e) {
-                
+    function handleTapTempo() {    
+
         let tapSeconds = new Date().getTime();
         
-        let bpm = ((1/ ((tapSeconds - lastTapSeconds) / 1000)) * 60 ); 
+        let next_bpm = Math.floor(((1/ ((tapSeconds - lastTapSeconds) / 1000)) * 60 )); 
         setLastTapSeconds(tapSeconds);
 
+        let avg = bpm;
 
-        if (Math.floor(bpm) !== 0) {
-            let avg = average * beats.length;
-            avg += Math.floor(bpm);
-            avg /= (beats.length + 1);
-
-            setBeats([...beats, Math.floor(bpm)]); 
-
-            setAverage(Math.floor(avg));
-
-            handleMetronomeChange({
-                target: {
-                    id: "bpm",
-                    value: Math.floor(bpm)
-                }
-            })
-
-            console.log(beats, average)
+        if (next_bpm !== 0) {
+            avg *= beats.length;
+            setBeats([...beats, next_bpm]); 
+        } else {
+            setBeats([...beats, bpm]);
         }
+        
+        avg += next_bpm;
+        avg /= (beats.length + 1);
 
+        setBpm(Math.floor(avg));
+        
+        
         if(beats.length >= 10) {
-            handleMetronomeChange({
-                target: {
-                    id: "bpm",
-                    value: average
-                }
-            })
-
-            setMessage("Average: " + average);
-            setAverage(0);
             setLastTapSeconds(0);
             setBeats([]);
         }
 
-        
+    }
 
+
+    function handleVolumeChange(e) {
+        setVolume(e.target.value);
+    }
+
+    function handleBpmChange(e) {
+        setBpm(e.target.value);
+        setBeats([]);
+        setLastTapSeconds(0);
     }
     
     return (
@@ -206,17 +154,22 @@ function Metronome() {
             </div>
 
             <div className='flex'>
-                <button className='metronome-btn' id='playing' onClick={handleMetronomeChange}>{metronome.playing ? "Pause" : "Play"}</button>
+                <button className='metronome-btn' id='playing' onClick={() => setPlaying(!playing)}>{playing ? "Stop" : "Start"}</button>
             </div>
 
             <div className='flex column'>
-                {message !== "" ? <h3>{ message }</h3> : <h3>{ metronome.bpm }</h3>}
+                <div className='flex column'>
+                    <h3 className='metronome-box'>Current BPM</h3>
+                    <p className='metronome-box'>{ bpm }</p>
+                </div>
+                    
+                <button className='metronome-btn' onClick={handleTapTempo}>Tap Tempo</button>                  
                 
-                <button className='metronome-btn' onClick={handleTapTempo}>BPM</button>
+                
             </div>
             
-            <div className='flex column'>
-                <div className='flex'>{clicks.map((click) => 
+            <div className='flex column metronome-block'>
+                <div className='flex metronome-box'>{clicks.map((click) => 
                     <div key={click}>
                         {
                             getLastPlayed()===click ? 
@@ -226,30 +179,24 @@ function Metronome() {
                         }
                     </div> )}
                 </div>
-                <div className='flex row'>
-                    <button className='metronome-btn' onClick={addClick}>Add Click</button>
-                    <button className='metronome-btn' onClick={removeLastClick}>Remove Click</button>
+                <div className='flex row metronome-box'>
+                    <button className='metronome-btn' disabled={clicks.length>11} onClick={addClick}>Add Click</button>
+                    <button className='metronome-btn' disabled={clicks.length<2} onClick={removeLastClick}>Remove Click</button>
                 </div>
             </div>
 
-            <div className='flex column'>
-                <div className='row'> 
+            <div className='flex column metronome-block'>
+                <div className='row metronome-box'> 
                     <p>Volume</p>   
-                    <input id='volume' type="range" min="0" max="1" step="0.01" value={metronome.volume} onChange={handleMetronomeChange} />
+                    <input id='volume' type="range" min="0" max="1" step="0.01" value={volume} onChange={handleVolumeChange} />
                 </div>
                 
-                <div className='row'>
+                <div className='row metronome-box'>
                     <p>BPM</p>   
-                    <input id='bpm' type="range" min="30" max="260" value={metronome.bpm} onChange={handleMetronomeChange} />
+                    <input id='bpm' type="range" min="30" max="260" value={bpm} onChange={handleBpmChange} />
                 </div>
 
-                <div className='row'>
-                    {sounds.map((sound,index) => <button className='metronome-btn' key={index} onClick={() => changeChosenSound(index)}>{ index }</button>)}
-                </div>
             </div>
-
-            
-
         </div>
     )
 }
