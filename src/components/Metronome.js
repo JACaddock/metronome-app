@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import useSound from 'use-sound';
 import placeholderImage from '../img/metronome.png';
+import minus from '../img/minus.svg';
+import plus from '../img/plus.svg';
 import pingSoundHi from "../static/ping-hi.mp3";
 import pingSoundLow from "../static/ping-low.mp3";
+import "./Metronome.css";
 
 
 
@@ -125,7 +128,6 @@ function Metronome() {
         
         avg += next_bpm;
         avg /= (beats.length + 1);
-
         setBpm(Math.floor(avg));
         
         
@@ -133,7 +135,6 @@ function Metronome() {
             setLastTapSeconds(0);
             setBeats([]);
         }
-
     }
 
 
@@ -142,7 +143,7 @@ function Metronome() {
     }
 
     function handleBpmChange(e) {
-        setBpm(e.target.value);
+        setBpm(parseInt(e.target.value));
         setBeats([]);
         setLastTapSeconds(0);
     }
@@ -159,7 +160,9 @@ function Metronome() {
 
             <div className='flex column'>
                 <div className='flex column'>
-                    <h3 className='metronome-box'>Current BPM</h3>
+                    <div className='flex metronome-box'>
+                        <h3 className='metronome-h3 '>Current BPM</h3>
+                    </div>
                     <p className='metronome-box'>{ bpm }</p>
                 </div>
                     
@@ -179,9 +182,10 @@ function Metronome() {
                         }
                     </div> )}
                 </div>
-                <div className='flex row metronome-box'>
-                    <button className='metronome-btn' disabled={clicks.length>11} onClick={addClick}>Add Click</button>
-                    <button className='metronome-btn' disabled={clicks.length<2} onClick={removeLastClick}>Remove Click</button>
+                <div className='flex row'>
+                    <button className='icon-btn' disabled={clicks.length<2} onClick={removeLastClick}><img className='icon-btn-img' src={minus} alt="minus icon" /></button>
+                    <p className="text">{clicks.length}</p>
+                    <button className='icon-btn' disabled={clicks.length>11} onClick={addClick}><img className='icon-btn-img' src={plus} alt="plus icon" /></button>
                 </div>
             </div>
 
