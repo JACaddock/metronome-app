@@ -157,6 +157,11 @@
     .metronome-radio {
         font-size: 20px;
     }
+
+    .metronome-btn:hover {
+      opacity: 100%;
+      background-color: #d8666c;
+    }
   }
   
   
