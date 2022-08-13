@@ -107,6 +107,61 @@
   }
   
   
+  .metronome-range {
+    -webkit-appearance: none;
+    width: 10rem;
+    background: transparent;
+    appearance: none;
+    
+  }
+
+
+  .metronome-range::-webkit-slider-runnable-track {
+    background: white;
+    height: 0.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+  }
+
+  .metronome-range::-moz-range-track {
+    background: white;
+    height: 0.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+  }
+
+  .metronome-range::-webkit-slider-thumb {
+    -webkit-appearance: none; /* Override default look */
+    appearance: none;
+    margin-top: -12px; /* Centers thumb on the track */
+    background-color: black;
+    height: 2rem;
+    width: 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    opacity: 85%;
+  }
+
+
+  .metronome-range::-moz-range-thumb {
+    border: none; /*Removes extra border that FF applies*/
+    background-color: black;
+    height: 2rem;
+    width: 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    opacity: 85%;
+  }
+  
+  
+  .metronome-range:hover::-webkit-slider-thumb {
+    opacity: 100%;
+  }
+  
+  
+  .metronome-range:hover::-moz-range-thumb {
+    opacity: 100%;
+  }
   
   
   .icon-btn {
