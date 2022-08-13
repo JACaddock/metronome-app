@@ -234,14 +234,14 @@ function Metronome() {
                 </div>
             </div>
 
-            <div className='flex column metronome-block'>
+            <div className='metronome-sliders metronome-block'>
                 <div className='row metronome-box'> 
-                    <p>Volume</p>   
+                    <p class="metronome-p">Volume</p>   
                     <input className='metronome-range' id='volume' type="range" min="0" max="1" step="0.01" value={volume} onChange={handleVolumeChange} />
                 </div>
                 
                 <div className='row metronome-box'>
-                    <p>BPM</p>   
+                    <p class="metronome-p">BPM</p>   
                     <input className='metronome-range' id='bpm' type="range" min="30" max="260" value={bpm} onChange={handleBpmChange} />
                 </div>
 

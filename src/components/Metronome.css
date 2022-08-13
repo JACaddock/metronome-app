@@ -62,6 +62,12 @@
     column-gap: 0.5rem;
     flex-direction: row;
   }
+
+  .metronome-sliders {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+  }
   
   .metronome-graphic {
     display: inline-flex;
@@ -221,6 +227,14 @@
   
   
   @media screen and (max-width: 540px) {
+    *{
+      overflow: hidden;
+    }
+
+    .metronome-block {
+      margin: 4px;
+    }
+
     .metronome {
       padding: 8px 24px;
     }
@@ -228,6 +242,26 @@
     .metronome-radio {
         font-size: 16px;
         border: 2px solid black;
+    }
+
+    .metronome-h3 {
+      font-size: 30px;
+    }
+
+    .metronome-box {
+      margin: 4px;
+    }
+
+    .metronome-p {
+      font-size: 12px;
+    }
+
+    .metronome-range {
+      width: 6rem;
+    }
+
+    .metronome-sliders {
+      flex-direction: row;
     }
   }
   

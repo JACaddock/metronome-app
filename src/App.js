@@ -8,7 +8,7 @@ function App() {
         <h1>Metronome Web App</h1>
       </header>
       <div>
-        <Metronome  className="flex" />
+        <Metronome />
       </div>
     </div>
   );
