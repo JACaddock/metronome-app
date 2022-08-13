@@ -209,6 +209,22 @@
     }
     
     
+  @media screen and (max-height: 1000px) {
+    * {
+      overflow: hidden;
+    }
+
+    .metronome-block {
+      margin: 4px;
+    }
+
+    .metronome-sliders {
+      flex-direction: row;
+    }
+  }
+
+
+
   @media screen and (max-width: 820px) {
     .metronome {
       padding: 16px 48px;
@@ -222,6 +238,10 @@
     .metronome-btn:hover {
       opacity: 100%;
       background-color: #d8666c;
+    }
+
+    .metronome-sliders {
+      flex-direction: column;
     }
   }
   
@@ -260,9 +280,7 @@
       width: 6rem;
     }
 
-    .metronome-sliders {
-      flex-direction: row;
-    }
+    
   }
   
   
