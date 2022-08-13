@@ -280,6 +280,10 @@
       width: 6rem;
     }
 
+    .metronome-sliders {
+      flex-direction: row;
+    }
+
     
   }
   
