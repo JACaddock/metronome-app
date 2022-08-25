@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { useBeats } from '../hooks/useBeats.js'
 import useSound from 'use-sound';
 import placeholderImage from '../img/metronome.png';
 import minus from '../img/minus.svg';
@@ -11,6 +12,9 @@ import "./Metronome.css";
 
 function Metronome() {   
 
+    const metronomeInterval = useRef();
+    const keyRef = useRef(handleKeyDown);
+    
     const [playing, setPlaying] = useState(false);
 
     const [volume, setVolume] = useState(() => {
@@ -43,80 +47,13 @@ function Metronome() {
     const [lastBpms, setLastBpms] = useState([]);  // Array of BPMs used to create the average BPM for Tap Tempo
 
     
-    const [beats, addBeat, removeLastBeat, getLastPlayed, getNextBeat, restartBeats] = useClickSound(); 
+    const {beats, addBeat, removeLastBeat, getBeatsVisual, getNextBeat, restartBeats} = useBeats(); 
 
-    // Custom useClickSound Hook
-    function useClickSound() {
-         // Array of Integers denoting the number of beats and their index
-        const [beats, setBeats] = useState(()=> {
-            if (localStorage.getItem("beats")) {
-                let array = [];
-                for (let i = 0; i < parseInt(localStorage.getItem("beats")); i++) {
-                    array.push(i);
-                }
-
-                return array;
-            } else {
-                return [0 , 1];
-            }
-        });
-
-        const [count, setCount] = useState(-1);     // Index of next beat to play
-
-
-        function addBeat() {
-            if (beats.length < 12) {
-                localStorage.setItem("beats", (beats.length + 1));
-
-                setBeats([...beats, beats.length]);
-                restartBeats();
-
-            }
-        }
-
-
-        function removeLastBeat() {
-            if (beats.length > 1) {
-                localStorage.setItem("beats", (beats.length - 1));
-
-                setBeats(beats.splice(0,beats.length-1));
-                restartBeats();
-            }
-        }
-
-
-        function getLastPlayed() {
-            return count;
-        }
-
-
-        function getNextBeat() {
-            if (count >= beats.length - 1) {
-                setCount(0);
-                return 0;
-            } else { 
-                setCount(count + 1);
-
-                return count + 1;
-            }
-        }
-
-
-        function restartBeats() {
-            setCount(-1);
-        }
-
-
-        return [beats, addBeat, removeLastBeat, getLastPlayed, getNextBeat, restartBeats]
-    }
-
+    
 
     useEffect(() => {
-        var metronomeInterval = null;
-
         if (playing) {           
-    
-            metronomeInterval = setInterval(() => {
+            metronomeInterval.current = setInterval(() => {
                 let count = getNextBeat();
     
                 if (count === 0) {
@@ -135,23 +72,38 @@ function Metronome() {
         }
 
         return () => {
-            clearInterval(metronomeInterval);
+            clearInterval(metronomeInterval.current);
         }
     }, [playing, bpm, playHigh, playLow, getNextBeat, restartBeats])
        
-
+    
+    useEffect(() => {
+        keyRef.current = handleKeyDown;
+    })
+    
+    
+    useEffect(() => {
+        const key = (e) => keyRef.current(e)
+        
+        window.addEventListener("keydown", key)
+        
+        return () => {
+            window.removeEventListener("keydown", key)
+        }    
+    }, [])
+    
+    
     function handleKeyDown(e) {
         if (e.key === "t") {
-            handleTapTempo(e);
+            handleTapTempo();
         }
     }
 
-
-    function handleTapTempo() {    
-
-        let tapSeconds = new Date().getTime();
+    
+    function handleTapTempo() {
+        const tapSeconds = new Date().getTime();
         
-        let next_bpm = Math.floor(((1/ ((tapSeconds - lastTapSeconds) / 1000)) * 60 )); 
+        const next_bpm = Math.floor(((1/ ((tapSeconds - lastTapSeconds) / 1000)) * 60 )); 
         setLastTapSeconds(tapSeconds);
 
         let avg = bpm;
@@ -164,7 +116,7 @@ function Metronome() {
         }
         
         avg += next_bpm;
-        avg /= (lastBpms.length + 1);
+        avg /= lastBpms.length + 1;
         setBpm(Math.floor(avg));
         localStorage.setItem("bpm", Math.floor(avg));
         
@@ -191,7 +143,7 @@ function Metronome() {
 
     
     return (
-        <div onKeyDown={handleKeyDown} className='metronome'>
+        <div className='metronome'>
             <div className='metronome-graphic'>
                 <img src={placeholderImage} alt="Placeholder for the Metronome"/>
             </div>
@@ -217,31 +169,22 @@ function Metronome() {
             </div>
             
             <div className='flex column metronome-block'>
-                <div className='flex metronome-box'>{beats.map((click) => 
-                    <div key={click}>
-                        {
-                            getLastPlayed()===click ? 
-                            <input type="radio" disabled className='metronome-radio metronome-radio-active' /> 
-                            : 
-                            <input type="radio" disabled className='metronome-radio' /> 
-                        }
-                    </div> )}
-                </div>
+                <div className='flex metronome-box'>{getBeatsVisual()}</div>
                 <div className='flex row'>
-                    <button className='icon-btn' disabled={beats.length<2} onClick={removeLastBeat}><img className='icon-btn-img' src={minus} alt="minus icon" /></button>
-                    <p className="text">{beats.length}</p>
-                    <button className='icon-btn' disabled={beats.length>11} onClick={addBeat}><img className='icon-btn-img' src={plus} alt="plus icon" /></button>
+                    <button className='icon-btn' disabled={beats<2} onClick={removeLastBeat}><img className='icon-btn-img' src={minus} alt="minus icon" /></button>
+                    <p className="text">{beats}</p>
+                    <button className='icon-btn' disabled={beats>11} onClick={addBeat}><img className='icon-btn-img' src={plus} alt="plus icon" /></button>
                 </div>
             </div>
 
             <div className='metronome-sliders metronome-block'>
                 <div className='row metronome-box'> 
-                    <p class="metronome-p">Volume</p>   
+                    <p className="metronome-p">Volume</p>   
                     <input className='metronome-range' id='volume' type="range" min="0" max="1" step="0.01" value={volume} onChange={handleVolumeChange} />
                 </div>
                 
                 <div className='row metronome-box'>
-                    <p class="metronome-p">BPM</p>   
+                    <p className="metronome-p">BPM</p>   
                     <input className='metronome-range' id='bpm' type="range" min="30" max="260" value={bpm} onChange={handleBpmChange} />
                 </div>
 
